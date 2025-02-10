@@ -13,18 +13,25 @@ export class ClockView {
     }
 
     private initializeDOM(onDelete: () => void): void {
+        // Trouver ou créer la grille
+        let clocksGrid = document.querySelector('.clocks-grid');
+        if (!clocksGrid) {
+            clocksGrid = document.createElement('div');
+            clocksGrid.className = 'clocks-grid';
+            document.body.appendChild(clocksGrid);
+        }
+    
         this.container = document.createElement('div');
         this.container.className = 'clock-container';
         this.container.setAttribute('draggable', 'true');
-
+    
         this.display = document.createElement('div');
         this.display.className = 'clock';
-        this.display.style.backgroundColor = this.backgroundColor;
-
+    
         const buttons = this.createButtons(onDelete);
         this.container.append(this.display, buttons);
-
-        document.body.appendChild(this.container);
+    
+        clocksGrid.appendChild(this.container);
         this.setupDragAndDrop();
     }
 
