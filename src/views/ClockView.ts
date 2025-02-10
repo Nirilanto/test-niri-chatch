@@ -23,6 +23,7 @@ export class ClockView {
     
         this.container = document.createElement('div');
         this.container.className = 'clock-container';
+        this.container.setAttribute('draggable', 'true');
     
         this.display = document.createElement('div');
         this.display.className = 'clock';
@@ -31,6 +32,7 @@ export class ClockView {
         this.container.append(this.display, buttons);
     
         clocksGrid.appendChild(this.container);
+        this.setupDragAndDrop();
     }
 
     private createButtons(onDelete: () => void): HTMLElement {
@@ -64,6 +66,44 @@ export class ClockView {
 
         buttonsContainer.append(modeBtn, increaseBtn, lightBtn, formatBtn, resetBtn, deleteBtn);
         return buttonsContainer;
+    }
+
+    private setupDragAndDrop(): void {
+        this.container.addEventListener('dragstart', (e) => {
+            e.dataTransfer?.setData('text/plain', this.id);
+            this.container.classList.add('dragging');
+        });
+
+        this.container.addEventListener('dragend', () => {
+            this.container.classList.remove('dragging');
+        });
+
+        this.container.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            this.container.classList.add('dragover');
+        });
+
+        this.container.addEventListener('dragleave', () => {
+            this.container.classList.remove('dragover');
+        });
+
+        this.container.addEventListener('drop', (e) => {
+            e.preventDefault();
+            this.container.classList.remove('dragover');
+            const draggedId = e.dataTransfer?.getData('text/plain');
+            if (draggedId && draggedId !== this.id) {
+                this.swapPositions(draggedId);
+            }
+        });
+    }
+
+    private swapPositions(otherId: string): void {
+        const otherClock = document.querySelector(`[id*="${otherId}"]`)?.closest('.clock-container');
+        if (otherClock && this.container.parentNode) {
+            const clone = this.container.cloneNode(true);
+            otherClock.replaceWith(this.container);
+            this.container.replaceWith(otherClock);
+        }
     }
 
     public updateDisplay(time: string, editMode: EditMode): void {
